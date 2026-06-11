@@ -1,0 +1,39 @@
+name: Test starts-with and ends-with inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_REF: refs/pull/1/merge
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- bot-comment"
+          ends-with: "<!-- end-bot-comment -->"
+          issue-number: "1"
+          token: ${{ github.token }}
+        continue-on-error: true
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- bot-comment" ]; then
+            echo "FAIL: expected '<!-- bot-comment' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches"
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- end-bot-comment -->" ]; then
+            echo "FAIL: expected '<!-- end-bot-comment -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ends-with output matches"
