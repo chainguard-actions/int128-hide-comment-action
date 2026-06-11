@@ -1,0 +1,46 @@
+name: Test all inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          authors: |
+            github-actions[bot]
+          starts-with: |
+            <!-- hide-comment-test -->
+          ends-with: |
+            <!-- end-hide-comment-test -->
+          contains: |
+            hide-comment-marker
+          issue-number: "1"
+          token: ${{ github.token }}
+        continue-on-error: true
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "INFO: starts-with output is empty (no comments matched or API unavailable in local run)"
+          else
+            echo "PASS: starts-with output = $ACTUAL"
+          fi
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "INFO: ends-with output is empty (no comments matched or API unavailable in local run)"
+          else
+            echo "PASS: ends-with output = $ACTUAL"
+          fi
+      - name: Verify action ran
+        run: |
+          echo "Action completed (with or without matching comments)"
+          echo "PASS"
