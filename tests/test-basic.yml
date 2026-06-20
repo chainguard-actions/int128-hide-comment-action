@@ -1,0 +1,42 @@
+name: Test basic usage - starts-with and ends-with outputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- bot-comment"
+          ends-with: "<!-- end-bot-comment -->"
+          token: "fake-token-for-testing"
+        # No issue-number provided and event is push (not pull_request),
+        # so the action returns early without making API calls,
+        # then sets the starts-with and ends-with outputs.
+
+      - name: Assert starts-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with: '$ACTUAL'"
+          if [ "$ACTUAL" != "<!-- bot-comment" ]; then
+            echo "FAIL: expected '<!-- bot-comment' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches input"
+
+      - name: Assert ends-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with: '$ACTUAL'"
+          if [ "$ACTUAL" != "<!-- end-bot-comment -->" ]; then
+            echo "FAIL: expected '<!-- end-bot-comment -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ends-with output matches input"

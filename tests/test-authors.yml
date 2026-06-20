@@ -1,0 +1,44 @@
+name: Test authors condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          authors: |
+            github-actions[bot]
+            dependabot[bot]
+          starts-with: "## Summary"
+          token: "fake-token-for-testing"
+        # No issue-number provided and event is push (not pull_request),
+        # so the action returns early without making API calls,
+        # then sets the starts-with and ends-with outputs.
+
+      - name: Assert starts-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with: '$ACTUAL'"
+          if [ "$ACTUAL" != "## Summary" ]; then
+            echo "FAIL: expected '## Summary' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches input"
+
+      - name: Assert action step ran (outcome is success)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: '$OUTCOME'"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected 'success' but got '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action step ran successfully"

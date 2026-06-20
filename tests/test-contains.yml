@@ -1,0 +1,41 @@
+name: Test contains condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          contains: "automated report"
+          token: "fake-token-for-testing"
+        # No issue-number provided and event is push (not pull_request),
+        # so the action returns early without making API calls,
+        # then sets the starts-with and ends-with outputs.
+
+      - name: Assert action step ran (outcome is success)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: '$OUTCOME'"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected 'success' but got '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action step ran successfully"
+
+      - name: Assert ends-with output is empty (no ends-with input given)
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with: '$ACTUAL'"
+          if [ -n "$ACTUAL" ]; then
+            echo "FAIL: expected empty ends-with output but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ends-with output is empty as expected"
