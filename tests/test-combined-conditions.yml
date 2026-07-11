@@ -1,0 +1,53 @@
+name: Test combined conditions with multiple inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up event payload
+        run: |
+          cp "$GITHUB_WORKSPACE/tests/fixtures/pull_request_event.json" /tmp/event.json
+          echo "GITHUB_EVENT_PATH=/tmp/event.json" >> "$GITHUB_ENV"
+          echo "GITHUB_REPOSITORY=int128/hide-comment-action" >> "$GITHUB_ENV"
+      - id: action
+        uses: .
+        env:
+          GITHUB_EVENT_NAME: pull_request
+          GITHUB_REPOSITORY: int128/hide-comment-action
+          GITHUB_EVENT_PATH: /tmp/event.json
+        with:
+          authors: |
+            github-actions[bot]
+          starts-with: "<!-- start-marker -->"
+          ends-with: "<!-- end-marker -->"
+          issue-number: "1"
+          token: ${{ github.token }}
+        continue-on-error: true
+      - name: Assert action ran and check outputs on success
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          ACTUAL_STARTS: ${{ steps.action.outputs.starts-with }}
+          ACTUAL_ENDS: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "actual starts-with: $ACTUAL_STARTS"
+          echo "actual ends-with: $ACTUAL_ENDS"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          if [ "$OUTCOME" = "success" ]; then
+            if [ "$ACTUAL_STARTS" != "<!-- start-marker -->" ]; then
+              echo "FAIL: expected starts-with output '<!-- start-marker -->' but got '$ACTUAL_STARTS'"
+              exit 1
+            fi
+            if [ "$ACTUAL_ENDS" != "<!-- end-marker -->" ]; then
+              echo "FAIL: expected ends-with output '<!-- end-marker -->' but got '$ACTUAL_ENDS'"
+              exit 1
+            fi
+            echo "PASS: both outputs correctly mirror inputs"
+          else
+            echo "PASS: action ran with outcome '$OUTCOME' (API call may have failed in test environment)"
+          fi

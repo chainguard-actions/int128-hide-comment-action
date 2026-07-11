@@ -1,0 +1,20 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "number": 1,
+    "title": "Test PR",
+    "body": "Test pull request body",
+    "state": "open",
+    "user": {
+      "login": "test-user"
+    }
+  },
+  "repository": {
+    "name": "hide-comment-action",
+    "full_name": "int128/hide-comment-action",
+    "owner": {
+      "login": "int128"
+    }
+  }
+}

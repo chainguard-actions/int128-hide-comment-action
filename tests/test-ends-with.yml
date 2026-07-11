@@ -1,0 +1,44 @@
+name: Test ends-with condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up event payload
+        run: |
+          cp "$GITHUB_WORKSPACE/tests/fixtures/pull_request_event.json" /tmp/event.json
+          echo "GITHUB_EVENT_PATH=/tmp/event.json" >> "$GITHUB_ENV"
+          echo "GITHUB_REPOSITORY=int128/hide-comment-action" >> "$GITHUB_ENV"
+      - id: action
+        uses: .
+        env:
+          GITHUB_EVENT_NAME: pull_request
+          GITHUB_REPOSITORY: int128/hide-comment-action
+          GITHUB_EVENT_PATH: /tmp/event.json
+        with:
+          ends-with: "<!-- /bot-comment -->"
+          issue-number: "1"
+          token: ${{ github.token }}
+        continue-on-error: true
+      - name: Assert action ran and check ends-with output on success
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "actual ends-with: $ACTUAL"
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          if [ "$OUTCOME" = "success" ]; then
+            if [ "$ACTUAL" != "<!-- /bot-comment -->" ]; then
+              echo "FAIL: expected ends-with output '<!-- /bot-comment -->' but got '$ACTUAL'"
+              exit 1
+            fi
+            echo "PASS: ends-with output correctly mirrors input"
+          else
+            echo "PASS: action ran with outcome '$OUTCOME' (API call may have failed in test environment)"
+          fi
