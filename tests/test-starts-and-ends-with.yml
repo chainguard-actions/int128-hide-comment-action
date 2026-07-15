@@ -1,0 +1,42 @@
+name: Test starts-with and ends-with combined
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create minimal event payload
+        run: |
+          echo '{}' > /tmp/event.json
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- terraform-plan-start -->"
+          ends-with: "<!-- terraform-plan-end -->"
+          token: ${{ github.token }}
+        env:
+          GITHUB_EVENT_NAME: push
+          GITHUB_REF: refs/heads/main
+          GITHUB_REPOSITORY: example/repo
+          GITHUB_EVENT_PATH: /tmp/event.json
+      - name: Assert starts-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with output: '$ACTUAL'"
+          if [ "$ACTUAL" != "<!-- terraform-plan-start -->" ]; then
+            echo "FAIL: expected '<!-- terraform-plan-start -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches input"
+      - name: Assert ends-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with output: '$ACTUAL'"
+          if [ "$ACTUAL" != "<!-- terraform-plan-end -->" ]; then
+            echo "FAIL: expected '<!-- terraform-plan-end -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ends-with output matches input"

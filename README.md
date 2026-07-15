@@ -1,19 +1,81 @@
-# int128/hide-comment-action
+# hide-comment-action [![ts](https://github.com/int128/hide-comment-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/hide-comment-action/actions/workflows/ts.yaml)
 
-Hide comment(s) of a pull request or issue
+This is an action to hide (minimize) comments in a pull request.
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/int128/hide-comment-action](https://github.com/int128/hide-comment-action).
+![screenshot](https://user-images.githubusercontent.com/321266/128599297-0edb5a92-7c83-42c7-9f8a-8946b4049ed3.png)
 
-## Versions
+## Getting Started
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.58.0 | [`v1.58.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.58.0) | [`392bc21`](https://github.com/int128/hide-comment-action/commit/392bc214093dafaebdf99c7d6298245262832d15) |
-| v1.59.0 | [`v1.59.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.59.0) | [`470cf6b`](https://github.com/int128/hide-comment-action/commit/470cf6b660f188047418db1eb3f72f0a88907e71) |
-| v1.60.0 | [`v1.60.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.60.0) | [`4a4b259`](https://github.com/int128/hide-comment-action/commit/4a4b259f4f47a711d8a58dfa1f5c644e16ab14ea) |
-| v1.61.0 | [`v1.61.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.61.0) | [`42ef2bf`](https://github.com/int128/hide-comment-action/commit/42ef2bf9a7d8751219e33ff76f19752fee8decec) |
-| v1.62.0 | [`v1.62.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.62.0) | [`e6c4e25`](https://github.com/int128/hide-comment-action/commit/e6c4e251e891a0543c2732e5d65d5882ff81a7d4) |
-| v1.65.0 | [`v1.65.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.65.0) | [`7938621`](https://github.com/int128/hide-comment-action/commit/7938621b1746abfe9727d44c8f6c47d5485192ca) |
+To hide comments when a pull request is created or updated:
+
+```yaml
+on:
+  pull_request:
+
+jobs:
+  test:
+    steps:
+      - uses: int128/hide-comment-action@v1
+```
+
+It hides all comments created by `github-actions` user.
+
+### Filter comments
+
+You can set the following conditions:
+
+- The author of comment is one of `authors`
+- The body of comment starts with one of `starts-with`
+- The body of comment ends with one of `ends-with`
+- The body of comment contains one of `contains`
+
+This action hides comment(s) which matches to **any** condition, i.e., evaluated as OR.
+
+If no condition is given, this action hides comment(s) created by the user of GitHub token.
+
+### Example: using `ends-with` condition
+
+When you post a comment, it would be nice to add some marker so that you can hide it in the next build.
+
+Here is an example workflow to hide the old comments before test.
+
+```yaml
+jobs:
+  test:
+    steps:
+      - id: hide-comment
+        uses: int128/hide-comment-action@v1
+        with:
+          ends-with: <!-- test-notification -->
+      - uses: int128/comment-action@v1
+        with:
+          post: |
+            :wave: Hello World!
+            ${{ steps.hide-comment.outputs.ends-with }}
+```
+
+## Specification
+
+This action works on pull request event only.
+It ignores other events.
+
+### Inputs
+
+| Name           | Default               | Description                                                    |
+| -------------- | --------------------- | -------------------------------------------------------------- |
+| `authors`      | -                     | Author condition (multi-line string)                           |
+| `starts-with`  | -                     | Starts-with condition (multi-line string)                      |
+| `ends-with`    | -                     | Ends-with condition (multi-line string)                        |
+| `contains`     | -                     | Contains condition (multi-line string)                         |
+| `issue-number` | -                     | Number of an issue or pull request on which to hide comment(s) |
+| `token`        | `${{ github.token }}` | GitHub token to post a comment                                 |
+
+### Outputs
+
+| Name          | Description                 |
+| ------------- | --------------------------- |
+| `starts-with` | Same as input `starts-with` |
+| `ends-with`   | Same as input `ends-with`   |
 
 ## Privacy
 

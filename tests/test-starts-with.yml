@@ -1,0 +1,31 @@
+name: Test starts-with condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create minimal event payload
+        run: |
+          echo '{}' > /tmp/event.json
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- bot-comment -->"
+          token: ${{ github.token }}
+        env:
+          GITHUB_EVENT_NAME: push
+          GITHUB_REF: refs/heads/main
+          GITHUB_REPOSITORY: example/repo
+          GITHUB_EVENT_PATH: /tmp/event.json
+      - name: Assert starts-with output mirrors input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with output: '$ACTUAL'"
+          if [ "$ACTUAL" != "<!-- bot-comment -->" ]; then
+            echo "FAIL: expected '<!-- bot-comment -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches input"
