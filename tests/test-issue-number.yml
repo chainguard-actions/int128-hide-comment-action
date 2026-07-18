@@ -9,11 +9,17 @@ jobs:
       - id: action
         uses: .
         with:
-          issue-number: "42"
-          starts-with: "<!-- hide-comment-test -->"
+          issue-number: "1"
+          starts-with: "<!-- hide-comment-action-test-nonexistent-prefix -->"
           token: ${{ github.token }}
-        continue-on-error: true
-      - name: Assert action ran with issue-number input
+      - name: Assert starts-with output matches input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
         run: |
-          echo "Action completed (may fail due to no real GitHub API in act, but input was accepted)"
-          echo "PASS: issue-number input was accepted by the action"
+          echo "actual starts-with: $ACTUAL"
+          EXPECTED="<!-- hide-comment-action-test-nonexistent-prefix -->"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "FAIL: expected '$EXPECTED' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
