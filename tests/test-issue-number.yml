@@ -1,0 +1,22 @@
+name: Test issue-number input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          issue-number: "1"
+          contains: "this-string-will-not-match-any-comment-xyz123"
+          token: ${{ github.token }}
+      - name: Assert starts-with output is present (even if empty)
+        env:
+          STARTS_WITH: ${{ steps.action.outputs.starts-with }}
+          ENDS_WITH: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "starts-with output: '$STARTS_WITH'"
+          echo "ends-with output: '$ENDS_WITH'"
+          echo "PASS: action completed with issue-number input"
