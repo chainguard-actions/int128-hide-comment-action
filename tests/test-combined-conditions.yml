@@ -1,0 +1,48 @@
+name: Test combined conditions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        name: Run hide-comment with combined starts-with and ends-with conditions
+        uses: .
+        with:
+          token: ${{ github.token }}
+          starts-with: |
+            __test_combined_starts_xyz__
+          ends-with: |
+            __test_combined_ends_xyz__
+
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with output: $ACTUAL"
+          EXPECTED="__test_combined_starts_xyz__
+          "
+          # The output is set from core.getInput('starts-with') which includes trailing newline
+          # Normalize by trimming whitespace for comparison
+          ACTUAL_TRIM="$(echo "$ACTUAL" | tr -d '[:space:]')"
+          EXPECTED_TRIM="__test_combined_starts_xyz__"
+          if [ "$ACTUAL_TRIM" != "$EXPECTED_TRIM" ]; then
+            echo "FAIL: expected starts-with output to contain '$EXPECTED_TRIM' but got '$ACTUAL_TRIM'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches"
+
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with output: $ACTUAL"
+          ACTUAL_TRIM="$(echo "$ACTUAL" | tr -d '[:space:]')"
+          EXPECTED_TRIM="__test_combined_ends_xyz__"
+          if [ "$ACTUAL_TRIM" != "$EXPECTED_TRIM" ]; then
+            echo "FAIL: expected ends-with output to contain '$EXPECTED_TRIM' but got '$ACTUAL_TRIM'"
+            exit 1
+          fi
+          echo "PASS: ends-with output matches"

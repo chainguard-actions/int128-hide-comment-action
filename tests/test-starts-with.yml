@@ -1,0 +1,29 @@
+name: Test starts-with condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        name: Run hide-comment with starts-with condition (no issue-number, exits early)
+        uses: .
+        with:
+          token: ${{ github.token }}
+          starts-with: |
+            __test_hide_comment_no_match_xyz_12345__
+
+      - name: Assert starts-with output matches input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with output: $ACTUAL"
+          ACTUAL_TRIM="$(echo "$ACTUAL" | tr -d '[:space:]')"
+          EXPECTED_TRIM="__test_hide_comment_no_match_xyz_12345__"
+          if [ "$ACTUAL_TRIM" != "$EXPECTED_TRIM" ]; then
+            echo "FAIL: expected starts-with output to be '$EXPECTED_TRIM' but got '$ACTUAL_TRIM'"
+            exit 1
+          fi
+          echo "PASS: starts-with output matches input"

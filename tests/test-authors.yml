@@ -1,0 +1,20 @@
+name: Test authors condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        name: Run hide-comment with authors condition (no issue-number, exits early)
+        uses: .
+        with:
+          token: ${{ github.token }}
+          authors: |
+            __nonexistent_test_author_xyz_12345__
+
+      - name: Assert action completed successfully
+        run: |
+          echo "PASS: action completed without error using authors condition"
