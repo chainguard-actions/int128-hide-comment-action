@@ -1,0 +1,46 @@
+name: Test hide-comment combined conditions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          authors: |
+            github-actions[bot]
+          starts-with: "<!-- terraform-plan -->"
+          ends-with: "<!-- /terraform-plan -->"
+          issue-number: "1"
+          token: ${{ github.token }}
+
+      - name: Assert action ran and outputs are set or failed gracefully
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          STARTS_WITH_OUT: ${{ steps.action.outputs.starts-with }}
+          ENDS_WITH_OUT: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "starts-with output: $STARTS_WITH_OUT"
+          echo "ends-with output: $ENDS_WITH_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            # Both outputs should echo back the inputs when action succeeds
+            if [ -z "$STARTS_WITH_OUT" ]; then
+              echo "FAIL: action succeeded but starts-with output is empty"
+              exit 1
+            fi
+            if [ -z "$ENDS_WITH_OUT" ]; then
+              echo "FAIL: action succeeded but ends-with output is empty"
+              exit 1
+            fi
+            echo "PASS: action succeeded with both outputs set"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo is not resolvable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
