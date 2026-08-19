@@ -1,0 +1,28 @@
+name: Test starts-with output passthrough
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: test-owner/test-repo
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- my-comment -->"
+          token: fake-token-for-testing
+
+      - name: Assert starts-with output matches input
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- my-comment -->" ]; then
+            echo "FAIL: expected '<!-- my-comment -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
