@@ -1,0 +1,36 @@
+name: Test multiple conditions combined
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          starts-with: "<!-- report-start -->"
+          ends-with: "<!-- report-end -->"
+          token: ${{ github.token }}
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual starts-with: $ACTUAL"
+          EXPECTED="<!-- report-start -->"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "FAIL: starts-with expected '$EXPECTED' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: starts-with output correct"
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual ends-with: $ACTUAL"
+          EXPECTED="<!-- report-end -->"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "FAIL: ends-with expected '$EXPECTED' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ends-with output correct"

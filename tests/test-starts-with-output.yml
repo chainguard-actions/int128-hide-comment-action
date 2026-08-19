@@ -1,0 +1,25 @@
+name: Test starts-with output mirrors input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          token: fake-token-for-testing
+          starts-with: "<!-- my-prefix -->"
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- my-prefix -->" ]; then
+            echo "FAIL: expected '<!-- my-prefix -->' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
