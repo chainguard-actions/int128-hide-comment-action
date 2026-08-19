@@ -6,14 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+
+      - name: Run hide-comment with issue-number input
+        id: action
         uses: .
         with:
-          issue-number: "1"
-          starts-with: "<!-- hide-comment-test -->"
           token: ${{ github.token }}
-        continue-on-error: true
-      - name: Assert action ran with issue-number input
+          issue-number: 1
+          contains: |
+            __nonexistent_marker_that_will_never_match__
+
+      - name: Assert starts-with output is present (even if empty)
+        env:
+          STARTS_WITH: ${{ steps.action.outputs.starts-with }}
+          ENDS_WITH: ${{ steps.action.outputs.ends-with }}
         run: |
-          echo "Action completed (may fail due to no real GitHub API in test environment)"
-          echo "PASS: issue-number input was accepted by the action"
+          echo "starts-with output: '$STARTS_WITH'"
+          echo "ends-with output: '$ENDS_WITH'"
+          echo "PASS: action completed successfully with issue-number input"
