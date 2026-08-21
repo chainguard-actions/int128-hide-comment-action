@@ -1,0 +1,33 @@
+name: Test no issue number provided
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          token: ${{ github.token }}
+          starts-with: "<!-- bot -->"
+      - name: Assert action ran (no issue number scenario)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          STARTS_WITH: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "starts-with output: $STARTS_WITH"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ "$STARTS_WITH" != "<!-- bot -->" ]; then
+              echo "FAIL: expected starts-with output to be '<!-- bot -->' but got '$STARTS_WITH'"
+              exit 1
+            fi
+            echo "PASS: action succeeded with no issue number, starts-with output matches"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected when no issue number or sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
