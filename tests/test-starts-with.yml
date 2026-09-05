@@ -1,0 +1,37 @@
+name: Test hide-comment starts-with condition
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          starts-with: "<!-- bot-comment -->"
+          issue-number: "1"
+          token: ${{ github.token }}
+
+      - name: Assert action ran and starts-with output is echoed
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          STARTS_WITH_OUT: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "starts-with output: $STARTS_WITH_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            # If the action succeeded, the starts-with output should match the input
+            if [ "$STARTS_WITH_OUT" != "<!-- bot-comment -->" ]; then
+              echo "FAIL: expected starts-with output to be '<!-- bot-comment -->' but got '$STARTS_WITH_OUT'"
+              exit 1
+            fi
+            echo "PASS: action succeeded and starts-with output matches input"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo is not resolvable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

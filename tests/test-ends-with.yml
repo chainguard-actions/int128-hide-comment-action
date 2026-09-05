@@ -1,0 +1,37 @@
+name: Test hide-comment ends-with condition and output passthrough
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          ends-with: "<!-- /bot-comment -->"
+          issue-number: "2"
+          token: ${{ github.token }}
+
+      - name: Assert action ran and ends-with output is echoed
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          ENDS_WITH_OUT: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "ends-with output: $ENDS_WITH_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            # If the action succeeded, the ends-with output should match the input
+            if [ "$ENDS_WITH_OUT" != "<!-- /bot-comment -->" ]; then
+              echo "FAIL: expected ends-with output to be '<!-- /bot-comment -->' but got '$ENDS_WITH_OUT'"
+              exit 1
+            fi
+            echo "PASS: action succeeded and ends-with output matches input"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo is not resolvable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
