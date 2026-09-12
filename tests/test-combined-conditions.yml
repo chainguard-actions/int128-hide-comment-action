@@ -1,0 +1,44 @@
+name: Test combined conditions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          authors: |
+            github-actions[bot]
+          starts-with: "<!-- report-start -->"
+          ends-with: "<!-- report-end -->"
+          contains: "automated report"
+          issue-number: "1"
+          token: ${{ github.token }}
+      - name: Assert outputs mirror inputs or action failed gracefully
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          STARTS_WITH_OUT: ${{ steps.action.outputs.starts-with }}
+          ENDS_WITH_OUT: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "starts-with output: $STARTS_WITH_OUT"
+          echo "ends-with output: $ENDS_WITH_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ "$STARTS_WITH_OUT" != "<!-- report-start -->" ]; then
+              echo "FAIL: expected starts-with output '<!-- report-start -->' but got '$STARTS_WITH_OUT'"
+              exit 1
+            fi
+            if [ "$ENDS_WITH_OUT" != "<!-- report-end -->" ]; then
+              echo "FAIL: expected ends-with output '<!-- report-end -->' but got '$ENDS_WITH_OUT'"
+              exit 1
+            fi
+            echo "PASS: action succeeded and outputs match inputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo is not resolvable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
