@@ -1,0 +1,50 @@
+name: Test basic usage on non pull_request event
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        env:
+          # The token comes from the `token` input (defaults to github.token).
+          # @octokit/auth-action rejects a token given both as an input and as
+          # env.GITHUB_TOKEN, so blank out any inherited GITHUB_TOKEN.
+          GITHUB_TOKEN: ""
+        with:
+          starts-with: "<!-- marker-start -->"
+          ends-with: "<!-- marker-end -->"
+          contains: "deploy preview"
+          authors: github-actions
+      - name: Assert step succeeded
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- marker-start -->" ]; then
+            echo "FAIL: expected '<!-- marker-start -->'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- marker-end -->" ]; then
+            echo "FAIL: expected '<!-- marker-end -->'"
+            exit 1
+          fi
+          echo "PASS"

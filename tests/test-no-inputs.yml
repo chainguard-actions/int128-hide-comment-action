@@ -1,0 +1,31 @@
+name: Test with no inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        env:
+          # Token is supplied via the `token` input default; avoid duplicate.
+          GITHUB_TOKEN: ""
+      - name: Assert success and empty outputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          SW: ${{ steps.action.outputs.starts-with }}
+          EW: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "starts-with: '$SW'"
+          echo "ends-with: '$EW'"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ -n "$SW" ] || [ -n "$EW" ]; then
+            echo "FAIL: expected empty outputs"
+            exit 1
+          fi
+          echo "PASS"

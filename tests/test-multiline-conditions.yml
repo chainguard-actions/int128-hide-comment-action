@@ -1,0 +1,40 @@
+name: Test multi-line conditions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        env:
+          # Token is supplied via the `token` input default; avoid duplicate.
+          GITHUB_TOKEN: ""
+        with:
+          starts-with: |
+            first-prefix
+            second-prefix
+          ends-with: |
+            first-suffix
+            second-suffix
+      - name: Assert starts-with output contains both lines
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -qx "first-prefix" || ! echo "$ACTUAL" | grep -qx "second-prefix"; then
+            echo "FAIL: expected both prefixes"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert ends-with output contains both lines
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -qx "first-suffix" || ! echo "$ACTUAL" | grep -qx "second-suffix"; then
+            echo "FAIL: expected both suffixes"
+            exit 1
+          fi
+          echo "PASS"
