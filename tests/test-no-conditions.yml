@@ -1,0 +1,30 @@
+name: Test no inputs on non pull_request event yields empty outputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        env:
+          # @octokit/auth-action rejects a token supplied via both INPUT_TOKEN
+          # (the token input default) and env GITHUB_TOKEN; clear the env one.
+          GITHUB_TOKEN: ""
+      - name: Assert step succeeded and outputs are empty
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          SW: ${{ steps.action.outputs.starts-with }}
+          EW: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "outcome: $OUTCOME starts-with: '$SW' ends-with: '$EW'"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ -n "$SW" ] || [ -n "$EW" ]; then
+            echo "FAIL: expected empty outputs"
+            exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,39 @@
+name: Test non pull_request event is a no-op and echoes outputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        env:
+          # @octokit/auth-action rejects a token supplied via both INPUT_TOKEN
+          # (the token input default) and env GITHUB_TOKEN; clear the env one.
+          GITHUB_TOKEN: ""
+        with:
+          authors: github-actions
+          starts-with: "<!-- start-marker -->"
+          ends-with: "<!-- end-marker -->"
+          contains: some text
+      - name: Assert starts-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.starts-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- start-marker -->" ]; then
+            echo "FAIL: expected '<!-- start-marker -->'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert ends-with output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ends-with }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "<!-- end-marker -->" ]; then
+            echo "FAIL: expected '<!-- end-marker -->'"
+            exit 1
+          fi
+          echo "PASS"
