@@ -28,6 +28,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.75.0 | [`v1.75.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.75.0) | [`d87d344`](https://github.com/int128/hide-comment-action/commit/d87d3445b5b7c0181476117977004197b1d19ddc) | [`HARDENING.md`](https://github.com/chainguard-actions/int128-hide-comment-action/blob/v1.75.0/HARDENING.md) |
 | v1.76.0 | [`v1.76.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.76.0) | [`632042d`](https://github.com/int128/hide-comment-action/commit/632042d5538b521f3ad07edb33cc3bae90ed9d23) | [`HARDENING.md`](https://github.com/chainguard-actions/int128-hide-comment-action/blob/v1.76.0/HARDENING.md) |
 | v1.77.0 | [`v1.77.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.77.0) | [`0615228`](https://github.com/int128/hide-comment-action/commit/06152282c98d81595109f39d4d1542d0c676ffba) | [`HARDENING.md`](https://github.com/chainguard-actions/int128-hide-comment-action/blob/v1.77.0/HARDENING.md) |
+| v1.78.0 | [`v1.78.0`](https://github.com/chainguard-actions/int128-hide-comment-action/tree/v1.78.0) | [`430b7e7`](https://github.com/int128/hide-comment-action/commit/430b7e736ceb7372703a3022d1a5a26f07328207) | [`HARDENING.md`](https://github.com/chainguard-actions/int128-hide-comment-action/blob/v1.78.0/HARDENING.md) |
 
 ## Privacy
 
