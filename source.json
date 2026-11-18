@@ -4,8 +4,13 @@
   "version": "v1.77.0",
   "commit_sha": "06152282c98d81595109f39d4d1542d0c676ffba",
   "url": "https://github.com/int128/hide-comment-action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/int128/hide-comment-action/v1.77.0/sha256-c33908b0598629f6d11bde695e20d224f329136a4a620f86f4b85383499fbfd2.tar.gz",
+    "sha256": "c33908b0598629f6d11bde695e20d224f329136a4a620f86f4b85383499fbfd2",
+    "size_bytes": 1265607
+  }
 }
