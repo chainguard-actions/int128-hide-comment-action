@@ -1,6 +1,16 @@
 {
   "owner": "int128",
   "repo": "hide-comment-action",
-  "version": "",
-  "url": "https://github.com/int128/hide-comment-action"
+  "version": "v1.79.0",
+  "commit_sha": "a06f2c83c4bf21f9b9f8b87b3bb88cb769aa5e74",
+  "url": "https://github.com/int128/hide-comment-action",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
+  "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
+  "test_agent_version": "2",
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/int128/hide-comment-action/v1.79.0/sha256-02f9ab20d72542f352dd1700fbd0d3cc2ff8602f602d862ce275ec30dbb0a264.tar.gz",
+    "sha256": "02f9ab20d72542f352dd1700fbd0d3cc2ff8602f602d862ce275ec30dbb0a264",
+    "size_bytes": 1277915
+  }
 }
